@@ -1,4 +1,4 @@
-name: Build macOS Universal App with PyInstaller
+name: Build macOS App for x86_64
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest  # Verwendet macOS Runner (x86_64 oder ARM64)
+    runs-on: macos-latest  # Verwendet macOS Runner (x86_64)
 
     steps:
     - name: Checkout Repository
@@ -24,14 +24,15 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
-    - name: Build macOS Universal App
+    - name: Build macOS App for x86_64
       run: |
-        # Erstelle eine Universal2-Binary (x86_64 + ARM64)
-        pyinstaller --name=BewerberPDFs --windowed --onefile --clean \
-                    --target-arch universal2 bewerber_pdfs.py
+        # Setze die Zielarchitektur auf x86_64
+        export ARCHFLAGS="-arch x86_64"
+        # Erstelle die App mit PyInstaller
+        pyinstaller --name=BewerberPDFs --windowed --onefile --clean bewerber_pdfs.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: BewerberPDFs-macOS-App
+        name: BewerberPDFs-macOS-x86_64
         path: dist/
