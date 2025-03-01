@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest  # Wir verwenden macOS-Runner für die Erstellung der .app-Datei
+    runs-on: macos-latest  # macOS-Runner verwenden
 
     steps:
     # Checkout der Repository-Dateien
@@ -43,9 +43,45 @@ jobs:
       run: |
         lipo -create -output ./dist/BewerberPDFs ./dist_x86_64/BewerberPDFs_x86_64 ./dist_arm64/BewerberPDFs_arm64
 
+    # Erstelle die .app-Datei
+    - name: Create macOS .app bundle
+      run: |
+        mkdir -p BewerberPDFs.app/Contents/MacOS
+        mkdir -p BewerberPDFs.app/Contents/Resources
+
+        # Kopiere die universelle Binärdatei in das .app-Bundle
+        cp ./dist/BewerberPDFs BewerberPDFs.app/Contents/MacOS/
+
+        # Erstelle eine Info.plist-Datei für das .app-Bundle
+        cat > BewerberPDFs.app/Contents/Info.plist <<EOL
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleExecutable</key>
+            <string>BewerberPDFs</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.example.BewerberPDFs</string>
+            <key>CFBundleName</key>
+            <string>BewerberPDFs</string>
+            <key>CFBundleVersion</key>
+            <string>1.0</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0</string>
+            <key>CFBundleIconFile</key>
+            <string>AppIcon.icns</string>  # Optional: Icon-Datei
+            <key>NSHighResolutionCapable</key>
+            <true/>
+        </dict>
+        </plist>
+        EOL
+
+        # Optional: Füge ein Icon hinzu (falls vorhanden)
+        # cp AppIcon.icns BewerberPDFs.app/Contents/Resources/
+
     # Archive das Ergebnis als Artefakt
-    - name: Archive universal binary
+    - name: Archive .app bundle
       uses: actions/upload-artifact@v4
       with:
         name: BewerberPDFs-universal
-        path: ./dist/BewerberPDFs  # Der Pfad zur erstellten universellen Binärdatei
+        path: BewerberPDFs.app  # Der Pfad zur erstellten .app-Datei
