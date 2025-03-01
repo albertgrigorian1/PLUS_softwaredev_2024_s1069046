@@ -1,38 +1,42 @@
-name: Build macOS Executable
+name: Build macOS App
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-latest  # Wir verwenden macOS-Runner für die Erstellung der .app-Datei
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # Checkout der Repository-Dateien
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+    # Installiere Python und Abhängigkeiten
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'  # Stelle sicher, dass die Python-Version übereinstimmt
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pandas img2pdf pyinstaller
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Falls du ein requirements.txt hast
+        pip install pyinstaller  # Installiere PyInstaller, falls noch nicht installiert
 
-      - name: Build for both x86_64 and arm64
-        run: |
-          # Build for x86_64 (Intel)
-          arch -x86_64 pyinstaller --onefile --windowed --name="BewerberPDFs_x86_64" bewerber_pdfs.py
-          
-          # Build for arm64 (Apple Silicon)
-          arch -arm64 pyinstaller --onefile --windowed --name="BewerberPDFs_arm64" bewerber_pdfs.py
+    # Erstelle die .app-Datei für beide Architekturen
+    - name: Build macOS app for both architectures
+      run: |
+        pyinstaller --onefile --windowed --name "MyApp" --distpath ./dist --workpath ./build --target-architecture=arm64,x86_64 your_script.py  # Ändere 'your_script.py' auf den Namen deiner Python-Datei
 
-          # Create a Universal Binary by combining both architectures
-          lipo -create dist/BewerberPDFs_x86_64 dist/BewerberPDFs_arm64 -output dist/BewerberPDFs
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: BewerberPDFs
-          path: dist/BewerberPDFs
+    # Archive das Ergebnis als Artefakt
+    - name: Archive .app file
+      uses: actions/upload-artifact@v2
+      with:
+        name: macos-app
+        path: ./dist/MyApp.app  # Der Pfad zur erstellten .app-Datei
