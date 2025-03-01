@@ -20,12 +20,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas img2pdf pyinstaller
 
-      - name: Run PyInstaller
+      - name: Build for both x86_64 and arm64
         run: |
-          pyinstaller --onefile --windowed --name="BewerberPDFs" bewerber_pdfs.py
+          # Build for x86_64 (Intel)
+          arch -x86_64 pyinstaller --onefile --windowed --name="BewerberPDFs_x86_64" bewerber_pdfs.py
+          
+          # Build for arm64 (Apple Silicon)
+          arch -arm64 pyinstaller --onefile --windowed --name="BewerberPDFs_arm64" bewerber_pdfs.py
+
+          # Create a Universal Binary by combining both architectures
+          lipo -create dist/BewerberPDFs_x86_64 dist/BewerberPDFs_arm64 -output dist/BewerberPDFs
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: BewerberPDFs
-          path: dist/
+          path: dist/BewerberPDFs
