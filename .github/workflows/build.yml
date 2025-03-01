@@ -15,11 +15,11 @@ jobs:
     steps:
     # Checkout der Repository-Dateien
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3  # Aktualisiert auf v3
 
     # Installiere Python und Abhängigkeiten
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3  # Aktualisiert auf v3
       with:
         python-version: '3.9'  # Stelle sicher, dass die Python-Version übereinstimmt
 
@@ -36,7 +36,7 @@ jobs:
 
     # Archive das Ergebnis als Artefakt
     - name: Archive .app file
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Aktualisiert auf v3
       with:
         name: macos-app
         path: ./dist/MyApp.app  # Der Pfad zur erstellten .app-Datei
