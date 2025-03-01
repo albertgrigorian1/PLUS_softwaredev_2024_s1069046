@@ -32,11 +32,11 @@ jobs:
     # Erstelle die .app-Datei für beide Architekturen
     - name: Build macOS app for both architectures
       run: |
-        pyinstaller --onefile --windowed --name "MyApp" --distpath ./dist --workpath ./build --target-architecture=arm64,x86_64 your_script.py  # Ändere 'your_script.py' auf den Namen deiner Python-Datei
+        pyinstaller --onefile --windowed --name "MyApp" --distpath ./dist --workpath ./build your_script.py  # Ändere 'bewerber_pdfs.py' auf den Namen deiner Python-Datei
 
     # Archive das Ergebnis als Artefakt
     - name: Archive .app file
-      uses: actions/upload-artifact@v3  # Update auf Version 3
+      uses: actions/upload-artifact@v4  # Update auf die neueste Version
       with:
         name: macos-app
         path: ./dist/MyApp.app  # Der Pfad zur erstellten .app-Datei
