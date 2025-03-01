@@ -1,4 +1,4 @@
-name: Build macOS App
+name: Build macOS Universal App
 
 on:
   push:
@@ -15,28 +15,37 @@ jobs:
     steps:
     # Checkout der Repository-Dateien
     - name: Checkout repository
-      uses: actions/checkout@v3  # Update auf Version 3
+      uses: actions/checkout@v3
 
     # Installiere Python und Abhängigkeiten
     - name: Set up Python
-      uses: actions/setup-python@v3  # Update auf Version 3
+      uses: actions/setup-python@v3
       with:
-        python-version: '3.9'  # Stelle sicher, dass die Python-Version übereinstimmt
+        python-version: '3.9'  # Python-Version anpassen, falls notwendig
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt  # Falls du ein requirements.txt hast
-        pip install pyinstaller  # Installiere PyInstaller, falls noch nicht installiert
+        pip install img2pdf pandas pyinstaller  # Installiere die benötigten Bibliotheken
 
-    # Erstelle die .app-Datei für beide Architekturen
-    - name: Build macOS app for both architectures
+    # Erstelle die Binärdatei für x86_64
+    - name: Build macOS app for x86_64
       run: |
-        pyinstaller --onefile --windowed --name "MyApp" --distpath ./dist --workpath ./build your_script.py  # Ändere 'bewerber_pdfs.py' auf den Namen deiner Python-Datei
+        arch -x86_64 pyinstaller --onefile --windowed --name "BewerberPDFs_x86_64" --distpath ./dist_x86_64 --workpath ./build_x86_64 bewerber_pdfs.py
+
+    # Erstelle die Binärdatei für arm64
+    - name: Build macOS app for arm64
+      run: |
+        arch -arm64 pyinstaller --onefile --windowed --name "BewerberPDFs_arm64" --distpath ./dist_arm64 --workpath ./build_arm64 bewerber_pdfs.py
+
+    # Kombiniere die Binärdateien zu einer universellen Binärdatei
+    - name: Create universal binary
+      run: |
+        lipo -create -output ./dist/BewerberPDFs ./dist_x86_64/BewerberPDFs_x86_64 ./dist_arm64/BewerberPDFs_arm64
 
     # Archive das Ergebnis als Artefakt
-    - name: Archive .app file
-      uses: actions/upload-artifact@v4  # Update auf die neueste Version
+    - name: Archive universal binary
+      uses: actions/upload-artifact@v4
       with:
-        name: macos-app
-        path: ./dist/MyApp.app  # Der Pfad zur erstellten .app-Datei
+        name: BewerberPDFs-universal
+        path: ./dist/BewerberPDFs  # Der Pfad zur erstellten universellen Binärdatei
