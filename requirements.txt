@@ -1,4 +1,3 @@
 img2pdf
 pandas
 openpyxl
-py2app
