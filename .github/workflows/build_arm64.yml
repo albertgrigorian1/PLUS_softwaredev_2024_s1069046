@@ -20,14 +20,17 @@ jobs:
         run: |
           arch -arm64 brew install python
 
-      - name: Install dependencies for ARM64
+      - name: Create virtual environment and install dependencies
         run: |
-          arch -arm64 python3 -m pip install --upgrade pip
-          arch -arm64 pip3 install --no-binary :all: pandas img2pdf pyinstaller
+          arch -arm64 python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install --no-binary :all: pandas img2pdf pyinstaller
 
       - name: Build ARM64 App
         run: |
-          arch -arm64 pyinstaller --onefile --windowed --name BewerberPDFApp test.py
+          source venv/bin/activate
+          pyinstaller --onefile --windowed --name BewerberPDFApp test.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
