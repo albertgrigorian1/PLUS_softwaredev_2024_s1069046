@@ -1,16 +1,16 @@
-name: Build ARM64 App
+name: Build Universal2 App
 
 on:
   push:
     branches:
-      - main  
+      - main
   pull_request:
     branches:
-      - main  
+      - main
 
 jobs:
   build:
-    runs-on: macos-14  # Nutze macOS 14 x86_64
+    runs-on: macos-latest  # Verwende einen x86_64 Runner
 
     steps:
       - name: Checkout code
@@ -26,9 +26,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas img2pdf pyinstaller
 
-      - name: Build App for ARM64
+      - name: Build App
         run: |
-          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch arm64 test.py
+          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch universal2 IhrSkript.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
