@@ -1,36 +1,34 @@
-name: Build ARM64 App
+name: Build Arm64 App
 
 on:
   push:
     branches:
-      - main  
+      - main
   pull_request:
     branches:
-      - main  
+      - main
 
 jobs:
   build:
-    runs-on: macos-14  # Nutzt macOS 14 (x86_64 mit Rosetta)
+    runs-on: macos-latest  # Verwende einen x86_64 Runner
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install ARM64 Python
-        run: |
-          arch -arm64 brew install python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-      - name: Create virtual environment and install dependencies
+      - name: Install dependencies
         run: |
-          arch -arm64 python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install --no-binary :all: pandas img2pdf pyinstaller
+          python -m pip install --upgrade pip
+          pip install pandas img2pdf pyinstaller
 
-      - name: Build ARM64 App
+      - name: Build App
         run: |
-          source venv/bin/activate
-          pyinstaller --onefile --windowed --name BewerberPDFApp test.py
+          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch arm64 test.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
