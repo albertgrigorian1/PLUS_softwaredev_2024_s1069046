@@ -31,7 +31,7 @@ jobs:
           pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch universal2 IhrSkript.py
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: BewerberPDFApp
           path: dist/
