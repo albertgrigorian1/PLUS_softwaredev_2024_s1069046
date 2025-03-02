@@ -73,6 +73,6 @@ class Steuerung:
         print("Alle Bewerber-PDFs wurden erstellt.")
 
 if __name__ == "__main__":
-    pfad = "/Users/dominik/Desktop/Excel/Bewerber.xlsx"  # Pfad zur Excel-Datei
+    pfad = "/Users/nick.reichert/Library/Mobile Documents/com~apple~CloudDocs/Own Business/Reichert Consulting_Einzelgewerbe/UG Reichert Consulting/RPP BUSINESS/00 CVs 2025/002 EXCEL CANDIDATES/Bewerber.xlsx"  # Pfad zur Excel-Datei
     steuerung = Steuerung(pfad)
     steuerung.ausfuehren()
