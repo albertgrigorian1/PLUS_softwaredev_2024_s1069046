@@ -1,34 +1,33 @@
-name: Build Universal2 App
+name: Build ARM64 App
 
 on:
   push:
     branches:
-      - main
+      - main  
   pull_request:
     branches:
-      - main
+      - main  
 
 jobs:
   build:
-    runs-on: macos-latest  # Verwende einen x86_64 Runner
+    runs-on: macos-14  # Nutzt macOS 14 (x86_64 mit Rosetta)
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
+      - name: Install ARM64 Python
         run: |
-          python -m pip install --upgrade pip
-          pip install pandas img2pdf pyinstaller
+          arch -arm64 brew install python
 
-      - name: Build App
+      - name: Install dependencies for ARM64
         run: |
-          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch universal2 test.py
+          arch -arm64 python3 -m pip install --upgrade pip
+          arch -arm64 pip3 install --no-binary :all: pandas img2pdf pyinstaller
+
+      - name: Build ARM64 App
+        run: |
+          arch -arm64 pyinstaller --onefile --windowed --name BewerberPDFApp test.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
