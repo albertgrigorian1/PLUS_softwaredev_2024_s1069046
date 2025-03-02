@@ -32,7 +32,7 @@ jobs:
       # Schritt 4: App mit PyInstaller erstellen
       - name: Build App
         run: |
-          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch arm64 IhrSkript.py
+          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch arm64 test.py
 
       # Schritt 5: Artefakte speichern
       - name: Upload Artifact
