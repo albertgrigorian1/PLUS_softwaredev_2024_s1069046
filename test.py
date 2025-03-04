@@ -63,6 +63,6 @@ def process_excel(file_path, output_dir):
         print(f"PDF für {bewerber} wurde erstellt: {os.path.abspath(pdf_path)}")
 
 if __name__ == '__main__':
-    excel_path = r"/Users/dominik/Desktop/Excel/Bewerber.xlsx"
-    output_directory = '/Users/dominik/Desktop/Bewerber_PDFs'
+    excel_path = r"/Users/nick.reichert/Library/Mobile Documents/com~apple~CloudDocs/Own Business/Reichert Consulting_Einzelgewerbe/UG Reichert Consulting/RPP BUSINESS/00 CVs 2025/001 FOTOS CVs 2025 02/Bewerber.xlsx"
+    output_directory = '/Users/nick.reichert/Library/Mobile Documents/com~apple~CloudDocs/Own Business/Reichert Consulting_Einzelgewerbe/UG Reichert Consulting/RPP BUSINESS/00 CVs 2025/004 PDF CVs 2025 02'
     process_excel(excel_path, output_directory)
