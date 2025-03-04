@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest  # Verwende einen x86_64 Runner
+    runs-on: macos-latest  # ARM64-Runner
 
     steps:
       - name: Checkout code
@@ -24,11 +24,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas img2pdf openpyxl pyinstaller
+          pip install pandas pillow pillow-heif reportlab openpyxl pyinstaller numpy
+
+      - name: Create numpy hook
+        run: |
+          echo "from PyInstaller.utils.hooks import collect_data_files" > hook-numpy.py
+          echo "datas = collect_data_files('numpy')" >> hook-numpy.py
 
       - name: Build App
         run: |
-          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch arm64 test.py
+          pyinstaller --onefile --windowed --name BewerberPDFApp --target-arch arm64 --additional-hooks-dir=. test.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
