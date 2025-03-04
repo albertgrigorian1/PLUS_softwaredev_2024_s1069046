@@ -63,6 +63,6 @@ def process_excel(file_path, output_dir):
         print(f"PDF für {bewerber} wurde erstellt: {os.path.abspath(pdf_path)}")
 
 if __name__ == '__main__':
-    excel_path = r"/Users/dominik/Desktop/ExcelBewerber.xlsx"
+    excel_path = r"/Users/dominik/Desktop/Excel/Bewerber.xlsx"
     output_directory = '/Users/dominik/Desktop/Bewerber_PDFs'
     process_excel(excel_path, output_directory)
