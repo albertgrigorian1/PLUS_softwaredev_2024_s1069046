@@ -1,68 +1,74 @@
 import os
+import img2pdf
 import pandas as pd
-from PIL import Image
-from pillow_heif import register_heif_opener
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
+import openpyxl
+import numpy
 
-# HEIC-Unterstützung aktivieren
-register_heif_opener()
+class Konfiguration:
+    def __init__(self, excel_pfad, ausgabe_ordner_name="Gruppierte-PDFs"):
+        self.excel_pfad = excel_pfad
+        self.ausgabe_ordner_name = ausgabe_ordner_name
 
-def heic_to_jpeg(heic_path):
-    image = Image.open(heic_path)
-    return image
+    def get_excel_pfad(self):
+        return self.excel_pfad
 
-def images_to_pdf(images, pdf_path):
-    if not images:
-        return
-    
-    c = canvas.Canvas(pdf_path, pagesize=A4)
-    width, height = A4
-    
-    for image in images:
-        # Bild skalieren, falls zu groß
-        img_width, img_height = image.size
-        scale = min(width / img_width, height / img_height)
-        new_size = (int(img_width * scale), int(img_height * scale))
-        image = image.resize(new_size)
+    def get_ausgabe_ordner_name(self):
+        return self.ausgabe_ordner_name
 
-        # Temporär speichern, weil reportlab mit Image-Objekten direkt nicht klarkommt
-        temp_jpg = "temp_image.jpg"
-        image.save(temp_jpg, format="JPEG", quality=95)
+class ExcelDatenLader:
+    def __init__(self, konfiguration):
+        self.konfiguration = konfiguration
+        self.daten = None
 
-        # Im PDF platzieren
-        c.drawImage(temp_jpg, 0, height - new_size[1], width=new_size[0], height=new_size[1])
-        c.showPage()
-        os.remove(temp_jpg)
+    def lade_excel_daten(self):
+        self.daten = pd.read_excel(self.konfiguration.get_excel_pfad())
 
-    c.save()
+    def get_daten(self):
+        return self.daten
 
-def process_excel(file_path, output_dir):
-    os.makedirs(output_dir, exist_ok=True)  # Überordner sicherstellen
+class BewerberGruppierer:
+    def __init__(self, daten):
+        self.daten = daten
 
-    df = pd.read_excel(file_path)
-    grouped = df.groupby('Bewerber')['Bild'].apply(list).to_dict()
+    def gruppiere_nach_bewerber(self):
+        return self.daten.groupby("Bewerber")
 
-    for bewerber, paths in grouped.items():
-        # PDF direkt im Überordner
-        pdf_path = os.path.join(output_dir, f'{bewerber}.pdf')
+class PDFErsteller:
+    def __init__(self, konfiguration):
+        self.konfiguration = konfiguration
 
-        if os.path.exists(pdf_path):
-            print(f"PDF für {bewerber} existiert bereits - wird überschrieben.")
-        
-        images = []
-        for path in paths:
-            if os.path.exists(path) and path.lower().endswith(".heic"):
-                try:
-                    img = heic_to_jpeg(path)
-                    images.append(img)
-                except Exception as e:
-                    print(f"Fehler beim Laden von {path}: {e}")
+    def erstelle_pdf_ordner(self):
+        pfad = os.path.join(os.getcwd(), self.konfiguration.get_ausgabe_ordner_name())
+        if not os.path.exists(pfad):
+            os.makedirs(pfad)
+        return pfad
 
-        images_to_pdf(images, pdf_path)
-        print(f"PDF für {bewerber} wurde erstellt: {os.path.abspath(pdf_path)}")
+    def konvertiere_und_speichere_pdfs(self, gruppen):
+        ordner = self.erstelle_pdf_ordner()
+        for bewerber, gruppe in gruppen:
+            bildpfade = gruppe["Bild"].tolist()
+            ausgabe = os.path.join(ordner, f"{bewerber}.pdf")
+            try:
+                with open(ausgabe, "wb") as f:
+                    f.write(img2pdf.convert(bildpfade))
+                print("PDF erstellt:", ausgabe)
+            except Exception as e:
+                print("Fehler beim Erstellen von", ausgabe, ":", e)
 
-if __name__ == '__main__':
-    excel_path = r"/Users/nick.reichert/Library/Mobile Documents/com~apple~CloudDocs/Own Business/Reichert Consulting_Einzelgewerbe/UG Reichert Consulting/RPP BUSINESS/00 CVs 2025/001 FOTOS CVs 2025 02/Bewerber.xlsx"
-    output_directory = '/Users/nick.reichert/Library/Mobile Documents/com~apple~CloudDocs/Own Business/Reichert Consulting_Einzelgewerbe/UG Reichert Consulting/RPP BUSINESS/00 CVs 2025/004 PDF CVs 2025 02'
-    process_excel(excel_path, output_directory)
+class Steuerung:
+    def __init__(self, excel_pfad):
+        self.konfiguration = Konfiguration(excel_pfad)
+        self.lader = ExcelDatenLader(self.konfiguration)
+        self.pdf_ersteller = PDFErsteller(self.konfiguration)
+
+    def ausfuehren(self):
+        self.lader.lade_excel_daten()
+        gruppierer = BewerberGruppierer(self.lader.get_daten())
+        gruppen = gruppierer.gruppiere_nach_bewerber()
+        self.pdf_ersteller.konvertiere_und_speichere_pdfs(gruppen)
+        print("Alle Bewerber-PDFs wurden erstellt.")
+
+if __name__ == "__main__":
+    pfad = r"C:\Users\HOSS\Desktop\Website NIK\Skript_IMG_PDF\Bewerber.xlsx"
+    steuerung = Steuerung(pfad)
+    steuerung.ausfuehren()
