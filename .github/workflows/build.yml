@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9]  # Verwende Python 3.9 für bessere Kompatibilität
+        python-version: [3.12]  # Verwende Python 3.9 für bessere Kompatibilität
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v3
